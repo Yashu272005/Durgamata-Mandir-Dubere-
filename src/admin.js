@@ -115,12 +115,12 @@ function uploadError(e) {
   if (e?.db) return "Saved to storage but the database rejected it. Upload failed. Please try again.";
   return "Upload failed. Please try again.";
 }
-const isAdminUser = (user) => !!user && (
-  user.app_metadata?.role === "admin"
-  || user.user_metadata?.role === "admin"
-  || user.raw_app_meta_data?.role === "admin"
-  || user.raw_user_meta_data?.role === "admin"
-);
+const isAdminUser = (user) => !!user && [
+  user.app_metadata,
+  user.user_metadata,
+  user.raw_app_meta_data,
+  user.raw_user_meta_data,
+].some((meta) => meta?.role === "admin");
 
 async function fnError(error) {
   if (error?.name === "FunctionsFetchError") {

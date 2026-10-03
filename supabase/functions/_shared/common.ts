@@ -29,8 +29,14 @@ export const USERNAME_RE = /^[a-z0-9][a-z0-9._-]{2,31}$/;
 export const MIN_PASSWORD = 10;
 
 export function isAdminUser(user?: { app_metadata?: { role?: string } | null; user_metadata?: { role?: string } | null; raw_app_meta_data?: { role?: string } | null; raw_user_meta_data?: { role?: string } | null } | null) {
-    const meta = user?.app_metadata ?? user?.user_metadata ?? user?.raw_app_meta_data ?? user?.raw_user_meta_data ?? {};
-    return (meta as { role?: string } | null)?.role === "admin";
+    const metas = [
+        user?.app_metadata,
+        user?.user_metadata,
+        user?.raw_app_meta_data,
+        user?.raw_user_meta_data,
+    ].filter(Boolean) as Array<{ role?: string } | null>;
+
+    return metas.some((meta) => meta?.role === "admin");
 }
 
 export function env() {
