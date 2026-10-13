@@ -55,7 +55,7 @@ const IMAGES = {
 const translations = {
   mr: {
     skip: "मुख्य मजकुराकडे जा",
-    brandName: "दुर्गा माता मित्र मंडळ ",
+    brandName: "दुर्गा माता मंदिर ",
     home: "मुख्यपृष्ठ",
     about: "आमच्याबद्दल",
     navratri: "नवरात्र उत्सव",
@@ -66,8 +66,8 @@ const translations = {
     tagline: "श्रद्धा • भक्ती • एकता • संस्कृती",
     heroBadge: "नवरात्र उत्सव • दुर्गा माता दौड",
     heroJai: "जय माता दी 🙏",
-    heroTitle: "दुर्गा माता मित्र मंडळ",
-    heroPlace: "डुबेर",
+    heroTitle: "दुर्गा माता मंदिर ",
+    heroPlace: "डुबेरे",
     heroDesc: "श्रद्धा, भक्ती, संस्कृती आणि एकतेचा उत्सव",
     heroBtn1: "उत्सव पहा",
     heroBtn2: "गॅलरी पहा",
@@ -77,7 +77,7 @@ const translations = {
     aboutTag: "आमची ओळख",
     aboutTitle: "आमच्याबद्दल",
     aboutText:
-      "दुर्गा माता मित्र मंडळ, डुबेर हे श्रद्धा, भक्ती, संस्कृती आणि सामाजिक एकतेला समर्पित मंडळ आहे. नवरात्र उत्सवाच्या माध्यमातून भक्तीमय वातावरण निर्माण करून समाजातील सर्वांना एकत्र आणण्याचा आमचा प्रयत्न आहे.",
+      "दुर्गा माता मंदिर, डुबेरे हे श्रद्धा, भक्ती, संस्कृती आणि सामाजिक एकतेला समर्पित मंडळ आहे. नवरात्र उत्सवाच्या माध्यमातून भक्तीमय वातावरण निर्माण करून समाजातील सर्वांना एकत्र आणण्याचा आमचा प्रयत्न आहे.",
     aboutText2:
       "घटस्थापना, आरती, गरबा-दांडिया, दुर्गा माता दौड आणि सांस्कृतिक कार्यक्रमांच्या माध्यमातून आपल्या परंपरेचा वारसा पुढील पिढीपर्यंत पोहोचवण्याचे कार्य मंडळ करत आहे.",
     aboutBadge: "जय माता दी",
@@ -122,7 +122,7 @@ const translations = {
     ddTitle: "दुर्गा माता दौड",
     ddSub: "भक्ती, एकता आणि उत्साहाचा धावता उत्सव",
     ddDesc:
-      "दुर्गा माता मित्र मंडळ, डुबेर यांच्या वतीने आयोजित दुर्गा माता दौड हा भक्ती, एकता, आरोग्य आणि युवा उत्साहाचा अनोखा उपक्रम आहे.",
+      "दुर्गा माता मंदिर, डुबेरे यांच्या वतीने आयोजित दुर्गा माता दौड हा भक्ती, एकता, आरोग्य आणि युवा उत्साहाचा अनोखा उपक्रम आहे.",
     ddLink: "नवरात्र उत्सवाचा अविभाज्य भाग — मातेच्या जयघोषात एकत्र धावणारे डुबेर.",
     ddBtn: "दुर्गा माता दौड विषयी अधिक जाणून घ्या",
     ddAlt: "भगवे ध्वज घेऊन दुर्गा माता दौडमध्ये धावणारे भक्त",
@@ -131,7 +131,7 @@ const translations = {
     dTime: "वेळ",
     dTimeVal: "लवकरच जाहीर होईल",
     dStart: "सुरुवातीचे ठिकाण",
-    dStartVal: "डुबेर",
+    dStartVal: "डुबेरे",
     dFinish: "समाप्तीचे ठिकाण",
     dFinishVal: "लवकरच जाहीर होईल",
     dDistance: "अंतर",
@@ -142,7 +142,7 @@ const translations = {
     ddCdNote: "तात्पुरती उलटगणती — अधिकृत तारीख लवकरच जाहीर होईल.",
     routeTitle: "दुर्गा माता दौड मार्ग",
     routeStart: "सुरुवात",
-    routeStartVal: "डुबेर",
+    routeStartVal: "डुबेरे",
     routeRun: "धावण्याचा मार्ग",
     routeFinish: "समाप्ती",
     routeTBA: "लवकरच जाहीर",
@@ -160,7 +160,7 @@ const translations = {
     evLoc: "स्थळ",
     dateTBA: "दिनांक लवकरच जाहीर होईल",
     timeTBA: "वेळ लवकरच जाहीर होईल",
-    locDubere: "डुबेर",
+    locDubere: "डुबेरे",
 
     // Gallery
     galTag: "क्षणचित्रे",
@@ -184,7 +184,7 @@ const translations = {
     ctTitle: "आमच्याशी संपर्क साधा",
     ctDesc: "उत्सव, दुर्गा माता दौड किंवा कार्यक्रमांविषयी माहितीसाठी आमच्याशी संपर्क साधा.",
     ctAddrLabel: "पत्ता",
-    ctAddr: "डुबेर",
+    ctAddr: "डुबेरे",
     ctPhoneLabel: "फोन",
     ctPhone: "संपर्क क्रमांक लवकरच उपलब्ध",
     ctEmailLabel: "ई-मेल",
@@ -201,14 +201,14 @@ const translations = {
     ftConnect: "जोडलेले राहा",
     socialSoon: "सोशल मीडिया लिंक लवकरच उपलब्ध होतील.",
     ftCopyPre: "©",
-    ftCopy: "दुर्गा माता मित्र मंडळ, डुबेर. सर्व हक्क राखीव.",
+    ftCopy: "दुर्गा माता मंदिर, डुबेरे. सर्व हक्क राखीव.",
     ftMade: "भक्तीभावाने तयार केलेले 🙏",
     backTop: "वर जा",
   },
 
   en: {
     skip: "Skip to main content",
-    brandName: "Durga Mata Mitra Mandal",
+    brandName: "Durga Mata Mandir",
     home: "Home",
     about: "About",
     navratri: "Navratri",
@@ -220,7 +220,7 @@ const translations = {
 
     heroBadge: "Navratri Festival • Durga Mata Daud",
     heroJai: "Jai Mata Di 🙏",
-    heroTitle: "Durga Mata Mitra Mandal",
+    heroTitle: "Durga Mata Mandir",
     heroPlace: "Dubere",
     heroDesc: "Celebrating faith, devotion, culture and unity",
     heroBtn1: "Explore Celebration",
@@ -231,7 +231,7 @@ const translations = {
     aboutTag: "Who we are",
     aboutTitle: "About Us",
     aboutText:
-      "Durga Mata Mitra Mandal, Dubere is dedicated to faith, devotion, culture and community unity. Through Navratri celebrations, we strive to create a devotional atmosphere and bring the community together.",
+      "Durga Mata Mandir, Dubere is dedicated to faith, devotion, culture and community unity. Through Navratri celebrations, we strive to create a devotional atmosphere and bring the community together.",
     aboutText2:
       "Through Ghatasthapana, aarti, garba-dandiya, Durga Daud and cultural programmes, the Mandal carries our cherished traditions forward to the next generation.",
     aboutBadge: "Jai Mata Di",
@@ -347,7 +347,7 @@ const translations = {
     ftConnect: "Stay connected",
     socialSoon: "Social media links will be available soon.",
     ftCopyPre: "©",
-    ftCopy: "Durga Mata Mitra Mandal, Dubere. All rights reserved.",
+    ftCopy: "Durga Mata Mandir, Dubere. All rights reserved.",
     ftMade: "Made with devotion 🙏",
     backTop: "Back to top",
   },
@@ -491,7 +491,7 @@ function applyTranslations() {
 
   document.title =
     lang === "mr"
-      ? "दुर्गा माता मित्र मंडळ, डुबेर | Durga Mata Mitra Mandal Dubere"
+      ? "दुर्गा माता , डुबेर | Durga Mata Mitra Mandal Dubere"
       : "Durga Mata Mitra Mandal Dubere | दुर्गा माता मित्र मंडळ";
 
   // Re-render dynamic content
