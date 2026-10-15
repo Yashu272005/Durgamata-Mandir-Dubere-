@@ -155,12 +155,8 @@ const translations = {
     evTag: "उत्सव दिनदर्शिका",
     evTitle: "आगामी कार्यक्रम",
     evDesc: "नवरात्र उत्सवातील भक्ती, संगीत आणि संस्कृतीने नटलेले कार्यक्रम. सर्व भाविकांचे हार्दिक स्वागत!",
-    evDate: "दिनांक",
-    evTime: "वेळ",
-    evLoc: "स्थळ",
-    dateTBA: "",
-    timeTBA: "वेळ लवकरच जाहीर होईल",
-    locDubere: "डुबेरे",
+
+
 
 
     // Gallery
@@ -306,12 +302,6 @@ const translations = {
     evTag: "Festival calendar",
     evTitle: "Upcoming Events",
     evDesc: "Programmes filled with devotion, music and culture during Navratri. Everyone is warmly welcome!",
-    evDate: "Date",
-    evTime: "Time",
-    evLoc: "Venue",
-    dateTBA: "Date will be announced soon",
-    timeTBA: "Time will be announced soon",
-    locDubere: "Dubere",
 
     galTag: "Moments",
     galTitle: "Festival Moments",
@@ -405,40 +395,44 @@ const NINE_FORMS = [
  */
 const EVENTS = [
   {
-    icon: "🏺", img: px(37531064, 700), mr: "घटस्थापना", en: "Ghatasthapana", date: null, time: null,
+    icon: "🏺", img: px(37531064, 700), mr: "घटस्थापना", en: "Ghatasthapana",
     dMr: "मंगल कलश स्थापनेने नवरात्र उत्सवाचा शुभारंभ.", dEn: "The auspicious beginning of Navratri with the sacred kalash."
   },
   {
-    icon: "💃", img: px(29492764, 700), mr: "गरबा नाईट", en: "Garba Night", date: null, time: null,
+    icon: "💃", img: px(29492764, 700), mr: "गरबा नाईट", en: "Garba Night",
     dMr: "पारंपरिक वेशभूषेत ढोल-ताशांच्या तालावर गरबा.", dEn: "Traditional garba to the beat of dhol in festive attire."
   },
   {
-    icon: "🥢", img: px(17264037, 700), mr: "दांडिया उत्सव", en: "Dandiya Utsav", date: null, time: null,
+    icon: "🥢", img: px(17264037, 700), mr: "दांडिया उत्सव", en: "Dandiya Utsav",
     dMr: "रंगीबेरंगी दांडियांचा उत्साहपूर्ण उत्सव.", dEn: "A joyful celebration with colourful dandiya sticks."
   },
   {
-    icon: "🪔", img: px(35655143, 700), mr: "महाआरती", en: "Maha Aarti", date: null, time: null,
+    icon: "🪔", img: px(35655143, 700), mr: "महाआरती", en: "Maha Aarti",
     dMr: "शेकडो दिव्यांच्या प्रकाशात मातेची महाआरती.", dEn: "The grand aarti of the Mother in the glow of countless diyas."
   },
   {
-    icon: "🎶", img: px(33437388, 700), mr: "भजन संध्या", en: "Bhajan Sandhya", date: null, time: null,
+    icon: "🎶", img: px(33437388, 700), mr: "भजन संध्या", en: "Bhajan Sandhya",
     dMr: "भक्तिगीते आणि भजनांनी सजलेली सायंकाळ.", dEn: "An evening filled with devotional songs and bhajans."
   },
   {
-    icon: "🍛", img: px(29215357, 700), mr: "महाप्रसाद", en: "Mahaprasad", date: null, time: null,
+    icon: "🍛", img: px(29215357, 700), mr: "महाप्रसाद", en: "Mahaprasad",
     dMr: "सर्व भाविकांसाठी प्रेमाने तयार केलेला महाप्रसाद.", dEn: "Sacred food lovingly prepared for all devotees."
   },
   {
-    icon: "🎭", img: px(36592889, 700), mr: "सांस्कृतिक कार्यक्रम", en: "Cultural Programme", date: null, time: null,
+    icon: "🎭", img: px(36592889, 700), mr: "सांस्कृतिक कार्यक्रम", en: "Cultural Programme",
     dMr: "नृत्य, नाट्य आणि कलागुणांचे सादरीकरण.", dEn: "Performances of dance, drama and local talent."
   },
   {
-    icon: "🏹", img: px(32575458, 700), mr: "विजयादशमी", en: "Vijayadashami", date: null, time: null,
+    icon: "🏹", img: px(32575458, 700), mr: "विजयादशमी", en: "Vijayadashami",
     dMr: "असत्यावर सत्याच्या विजयाचा उत्सव — दसरा.", dEn: "Dussehra — celebrating the victory of good over evil."
   },
   {
-    icon: "🏹", img: px(32575458, 700), mr: "वसुबारस", en: "", date: null, time: null,
-    dMr: "असत्यावर सत्याच्या विजयाचा उत्सव — दसरा.", dEn: "Dussehra — celebrating the victory of good over evil."
+    icon: "", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQGUfyZNezCo-KAVSrwsqUtSsztAePrYM6EbhBgYDDhuw&s=10", mr: "कोजागरी पौर्णिमेची", en: "Kojagiri Purnima",
+    dMr: "कोजागरी पौर्णिमा (आश्विन किंवा शरद पौर्णिमा) हा हिंदू धर्मातील एक महत्त्वाचा सण आहे.", dEn: "Kojagiri Purnima (also known as Ashwin Purnima or Sharad Purnima) is a highly significant and auspicious festival in Hinduism."
+  },
+  {
+    icon: "", img: "https://d3pc1xvrcw35tl.cloudfront.net/ln/images/420x315/vasubaras_2025101020828.jpg", mr: "वसुबारस", en: "Vasubaras",
+    dMr: "वसुबारस (गोवत्स द्वादशी) हा महाराष्ट्रात दिवाळीची सुरुवात करणारा पहिला सण आहे", dEn: "Vasubaras (also known as Govatsa Dwadashi) is the first festival that marks the beginning of the Diwali celebrations in Maharashtra."
   }
 ];
 
