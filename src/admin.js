@@ -19,9 +19,9 @@ const PAGE = 24;
 const MIN_PASSWORD = 10;
 
 /* ------------------------------ years ------------------------------- */
-const YEAR_MIN = 2024;
+const YEAR_MIN = 2023;
 const YEAR_MAX = 2035;
-const YEARS = Array.from({ length: YEAR_MAX - YEAR_MIN + 1 }, (_, i) => YEAR_MIN + i); // 2024 … 2035
+const YEARS = Array.from({ length: YEAR_MAX - YEAR_MIN + 1 }, (_, i) => YEAR_MIN + i); // 2023 … 2035
 const clampYear = (y) => Math.min(YEAR_MAX, Math.max(YEAR_MIN, Number(y) || new Date().getFullYear()));
 const yearOptions = (selected) => YEARS.map((y) => `<option value="${y}" ${Number(selected) === y ? "selected" : ""}>${y}</option>`).join("");
 const yearOf = (m) => clampYear(m.year);
@@ -97,9 +97,9 @@ const S = {
   user: null, verifiedAt: 0, recovery: false, notice: "", view: "dashboard",
   media: [], loaded: false, loading: false, loadError: "",
   activity: null, activityError: "",
-  f: { chip: "all", q: "", sort: "newest", cat: "" }, limit: PAGE, typeLimit: { image: PAGE, video: PAGE },
+  f: { chip: "all", q: "", sort: "newest", cat: "", year: "" }, limit: PAGE, typeLimit: { image: PAGE, video: PAGE },
   sel: new Set(), stage: { image: [], video: [] }, uploading: false,
-  uploadOpts: { category: "General", publish: true }, shell: false,
+  uploadOpts: { category: "General", publish: true, year: clampYear() }, shell: false,
 };
 const bump = () => { lastActive = Date.now(); };
 let routeSeq = 0, confirmResolve = null, lastActive = Date.now(), idleTimer = null;
@@ -109,6 +109,7 @@ function friendly(error) {
   const msg = String(error?.message || error || "");
   if (error?.code === "42501" || /row-level security|not authorized|jwt|permission/i.test(msg) || [401, 403].includes(error?.status)) return "You are not authorized to perform this action.";
   if (/failed to fetch|network|load failed/i.test(msg)) return "Network problem. Check your connection and try again.";
+  if (/column .*year|gallery_media_year_range/i.test(msg)) return "The database is missing the year column. Run supabase/year_setup.sql first.";
   return "A database error occurred. Please try again.";
 }
 function uploadError(e) {
@@ -117,7 +118,7 @@ function uploadError(e) {
   if (e?.status === 415 || /mime|unsupported/i.test(m)) return "This file type is not accepted by storage.";
   if ([401, 403].includes(e?.status) || /row-level|not authorized|jwt/i.test(m)) return "You are not authorized to perform this action.";
   if (/network/i.test(m)) return "Network failure. Upload failed. Please try again.";
-  if (e?.db) return "Saved to storage but the database rejected it. Upload failed. Please try again.";
+  if (e?.db) return /year/i.test(m) ? friendly(e) : "Saved to storage but the database rejected it. Upload failed. Please try again.";
   return "Upload failed. Please try again.";
 }
 const isAdminUser = (user) => !!user && [
@@ -437,11 +438,11 @@ function mediaCard(m, { select = false } = {}) {
   const file = m.file_name || m.storage_path.split("/").pop();
   return `<article class="mcard ${S.sel.has(m.id) ? "is-selected" : ""}" data-id="${m.id}">
     <div class="mcard__thumb">${thumb(m)}${m.media_type === "video" ? `<span class="mcard__play">${icon("play", 20)}</span>` : ""}
-      <span class="badge badge--type">${m.media_type === "video" ? "Video" : "Photo"}</span>
+      <span class="badge badge--type">${m.media_type === "video" ? "Video" : "Photo"} · ${yearOf(m)}</span>
       <span class="badge ${live ? "badge--live" : "badge--draft"}">${live ? "Published" : "Unpublished"}</span>
       ${select ? `<label class="mcard__check"><input type="checkbox" data-select="${m.id}" ${S.sel.has(m.id) ? "checked" : ""} aria-label="Select" /></label>` : ""}</div>
     <div class="mcard__body"><h3 title="${esc(m.title)}">${esc(m.title)}</h3><p class="mcard__file" title="${esc(file)}">${esc(file)}</p>
-      <p class="mcard__meta">${fmtDate(m.created_at)} · ${fmtBytes(m.file_size, true)} · ${esc(m.category)}</p>
+      <p class="mcard__meta">${yearOf(m)} · ${fmtDate(m.created_at)} · ${fmtBytes(m.file_size, true)} · ${esc(m.category)}</p>
       <div class="mcard__actions">
         <button data-action="edit" data-id="${m.id}">${icon("edit", 16)} Edit</button>
         <button data-action="toggle-status" data-id="${m.id}">${icon(live ? "eyeoff" : "eye", 16)} ${live ? "Unpublish" : "Publish"}</button>
@@ -458,6 +459,7 @@ function viewUpload(kind) {
         <span class="dz__ico">${icon("upload", 34)}</span><b>Drag &amp; drop ${k.plural.toLowerCase()} here</b>
         <span>or <u>browse files</u> · ${k.formats} · max ${k.max} MB each${kind === "image" ? " · large photos are optimised automatically" : ""}</span></label>
       <div class="up__opts"><label class="field"><span>Category</span><input data-opt="category" list="catlist" maxlength="60" value="${esc(S.uploadOpts.category)}" /></label>
+        <label class="field"><span>Year</span><select data-opt="year" aria-label="Year">${yearOptions(S.uploadOpts.year)}</select></label>
         <datalist id="catlist">${categories().map((c) => `<option value="${esc(c)}">`).join("")}</datalist>
         <label class="switch"><input type="checkbox" data-opt="publish" ${S.uploadOpts.publish ? "checked" : ""} /><i></i><span>Publish immediately</span></label></div>
       <div class="stage" id="stage-${kind}"></div>
@@ -493,8 +495,11 @@ function paintProgress(it) {
 
 /* ---- library ---- */
 function libraryItems() {
-  const { chip, q, sort, cat } = S.f;
-  let l = S.media.filter((m) => (chip === "all" || (chip === "image" && m.media_type === "image") || (chip === "video" && m.media_type === "video") || chip === m.status) && (!cat || m.category === cat));
+  const { chip, q, sort, cat, year } = S.f;
+  let l = S.media.filter((m) =>
+    (chip === "all" || (chip === "image" && m.media_type === "image") || (chip === "video" && m.media_type === "video") || chip === m.status)
+    && (!cat || m.category === cat)
+    && (!year || yearOf(m) === Number(year)));
   const needle = q.trim().toLowerCase();
   if (needle) l = l.filter((m) => `${m.title} ${m.file_name || ""}`.toLowerCase().includes(needle));
   const cmp = { newest: (a, b) => new Date(b.created_at) - new Date(a.created_at), oldest: (a, b) => new Date(a.created_at) - new Date(b.created_at), az: (a, b) => a.title.localeCompare(b.title), za: (a, b) => b.title.localeCompare(a.title) }[sort];
@@ -505,6 +510,7 @@ function viewLibrary() {
   return `<section class="toolbar a-glass"><label class="search">${icon("library", 18)}<input data-search placeholder="Search by title or filename" value="${esc(S.f.q)}" /></label>
       <div class="chips" role="tablist">${chips.map(([k, l]) => `<button class="a-chip ${S.f.chip === k ? "adm-on" : ""}" data-chip="${k}">${l}</button>`).join("")}</div>
       <div class="selects"><select data-sort aria-label="Sort">${[["newest", "Newest"], ["oldest", "Oldest"], ["az", "Name A-Z"], ["za", "Name Z-A"]].map(([k, l]) => `<option value="${k}" ${S.f.sort === k ? "selected" : ""}>${l}</option>`).join("")}</select>
+      <select data-yearfilter aria-label="Year"><option value="">All years</option>${yearOptions(S.f.year)}</select>
       <select data-catfilter aria-label="Category"><option value="">All categories</option>${categories().map((c) => `<option ${S.f.cat === c ? "selected" : ""}>${esc(c)}</option>`).join("")}</select></div></section>
     <div id="bulkbar"></div><div id="libgrid"></div>`;
 }
@@ -526,12 +532,29 @@ function paintBulk() {
     <button class="adm-btn adm-btn--danger" data-action="bulk-delete">${icon("trash", 16)} Delete</button><button class="adm-iconbtn" data-action="clear-sel" aria-label="Clear selection">${icon("x", 18)}</button></div>` : "";
 }
 
-/* ---- gallery management ---- */
-function viewGallery() {
+/* ---- gallery management (by year, then by category) ---- */
+function viewGallery() { return viewYears() + viewCategories(); }
+
+function viewYears() {
+  return `<p class="hint">Organise the public gallery year by year (${YEAR_MIN}–${YEAR_MAX}). Actions apply to every item in that year.</p>
+    <div class="sec-head"><h2>By year</h2></div>
+    <div class="ygrid">${YEARS.map((y) => {
+    const items = S.media.filter((m) => yearOf(m) === y);
+    const live = items.filter((m) => m.status === "published").length;
+    return `<article class="ycard a-glass ${items.length ? "" : "is-empty"}"><span class="ycard__year">${y}</span>
+        <p>${items.filter((m) => m.media_type === "image").length} photos · ${items.filter((m) => m.media_type === "video").length} videos · ${live} published</p>
+        <div class="ycard__actions">
+          <a class="adm-btn adm-btn--ghost" href="#/admin/library" data-year-open="${y}">Open</a>
+          <button class="adm-btn adm-btn--ghost" data-action="year-publish" data-year="${y}" ${items.length ? "" : "disabled"}>Publish all</button>
+          <button class="adm-btn adm-btn--ghost" data-action="year-unpublish" data-year="${y}" ${items.length ? "" : "disabled"}>Unpublish all</button></div></article>`;
+  }).join("")}</div>
+    <div class="sec-head"><h2>By category</h2></div>`;
+}
+
+function viewCategories() {
   const cats = categories();
   if (!cats.length) return emptyState("No categories yet", "Categories appear here once you upload media.", "image");
-  return `<p class="hint">Organise the public gallery by category. Actions apply to every item in the category.</p>
-    <div class="cats">${cats.map((c) => {
+  return `<div class="cats">${cats.map((c) => {
     const items = S.media.filter((m) => m.category === c), live = items.filter((m) => m.status === "published").length;
     return `<article class="cat a-glass"><div><h3>${esc(c)}</h3><p>${items.filter((m) => m.media_type === "image").length} photos · ${items.filter((m) => m.media_type === "video").length} videos · ${live} published</p></div>
         <div class="cat__actions"><button class="adm-btn adm-btn--ghost" data-action="cat-rename" data-cat="${esc(c)}">${icon("edit", 16)} Rename</button>
@@ -578,6 +601,7 @@ function openEdit(id) {
       <label class="field"><span>Description</span><textarea name="description" rows="3" maxlength="1000">${esc(m.description || "")}</textarea></label>
       <label class="field"><span>Category</span><input name="category" required maxlength="60" list="catlist" value="${esc(m.category)}" /></label>
       <datalist id="catlist">${categories().map((c) => `<option value="${esc(c)}">`).join("")}</datalist>
+      <label class="field"><span>Year</span><select name="year">${yearOptions(yearOf(m))}</select></label>
       <label class="field"><span>Status</span><select name="status"><option value="published" ${m.status === "published" ? "selected" : ""}>Published</option><option value="unpublished" ${m.status === "unpublished" ? "selected" : ""}>Unpublished</option></select></label>
       <label class="field"><span>Replace ${k.label.toLowerCase()} (optional · ${k.formats} · max ${k.max} MB)</span><input type="file" name="file" accept="${k.accept}" /></label>
       <div class="prog" id="editprog" hidden><i></i></div>
@@ -719,13 +743,19 @@ async function startUpload(kind) {
   S.uploading = true;
   S.uploadOpts.category = ($("[data-opt=category]")?.value.trim() || "General").slice(0, 60);
   S.uploadOpts.publish = $("[data-opt=publish]")?.checked ?? true;
+  S.uploadOpts.year = clampYear($("[data-opt=year]")?.value ?? S.uploadOpts.year);
   paintStage(kind);
   let ok = 0, bad = 0;
   for (const it of queue) {
     it.state = "uploading"; it.progress = 0; it.error = ""; paintStage(kind);
     try {
       const st = await storeFile(kind, it.file, it.mime, (p) => { it.progress = p; paintProgress(it); });
-      const row = { title: it.title.trim() || "Untitled", category: S.uploadOpts.category, media_type: kind, storage_path: st.storage_path, thumbnail_path: st.thumbnail_path, file_name: it.file.name.slice(0, 200), file_size: st.file_size, status: S.uploadOpts.publish ? "published" : "unpublished" };
+      const row = {
+        title: it.title.trim() || "Untitled", category: S.uploadOpts.category, year: S.uploadOpts.year,
+        media_type: kind, storage_path: st.storage_path, thumbnail_path: st.thumbnail_path,
+        file_name: it.file.name.slice(0, 200), file_size: st.file_size,
+        status: S.uploadOpts.publish ? "published" : "unpublished",
+      };
       const { data, error } = await supabase.from("gallery_media").insert(row).select().single();
       if (error) { await removeFiles(st.made); throw Object.assign(error, { db: true }); }
       S.media.unshift(data); it.state = "done"; it.progress = 1; ok++;
@@ -735,7 +765,7 @@ async function startUpload(kind) {
   S.uploading = false;
   S.stage[kind].filter((i) => i.state === "done").forEach((i) => URL.revokeObjectURL(i.url));
   S.stage[kind] = S.stage[kind].filter((i) => i.state !== "done");
-  if (ok) toast(ok > 1 ? `${ok} ${KINDS[kind].plural.toLowerCase()} uploaded successfully.` : `${KINDS[kind].label} uploaded successfully.`);
+  if (ok) toast(ok > 1 ? `${ok} ${KINDS[kind].plural.toLowerCase()} uploaded to ${S.uploadOpts.year}.` : `${KINDS[kind].label} uploaded to ${S.uploadOpts.year}.`);
   if (bad) toast("Upload failed. Please try again.", "error");
   renderView();
 }
@@ -767,7 +797,13 @@ async function saveEdit(form) {
   const m = byId(form.dataset.id);
   if (!m) return;
   const fd = new FormData(form), file = fd.get("file");
-  const patch = { title: String(fd.get("title")).trim(), description: String(fd.get("description")).trim() || null, category: String(fd.get("category")).trim() || "General", status: String(fd.get("status")) };
+  const patch = {
+    title: String(fd.get("title")).trim(),
+    description: String(fd.get("description")).trim() || null,
+    category: String(fd.get("category")).trim() || "General",
+    year: clampYear(fd.get("year")),
+    status: String(fd.get("status")),
+  };
   if (!patch.title) return setMsg("Title is required.");
   busy(form, true); setMsg("");
   let stored = null;
@@ -817,12 +853,14 @@ async function onClick(e) {
   const pw = e.target.closest("[data-toggle-pw]");
   if (pw) { const i = pw.parentElement.querySelector("input"); const show = i.type === "password"; i.type = show ? "text" : "password"; pw.innerHTML = icon(show ? "eyeoff" : "eye", 18); return; }
   const open = e.target.closest("[data-cat-open]");
-  if (open) { S.f = { chip: "all", q: "", sort: "newest", cat: open.dataset.catOpen }; S.limit = PAGE; return; }
+  if (open) { S.f = { chip: "all", q: "", sort: "newest", cat: open.dataset.catOpen, year: "" }; S.limit = PAGE; return; }
+  const yopen = e.target.closest("[data-year-open]");
+  if (yopen) { S.f = { chip: "all", q: "", sort: "newest", cat: "", year: yopen.dataset.yearOpen }; S.limit = PAGE; return; }
   const chip = e.target.closest("[data-chip]");
   if (chip) { S.f.chip = chip.dataset.chip; S.limit = PAGE; return paintLibrary(); }
   const el = e.target.closest("[data-action]");
   if (!el) return;
-  const { action, id, kind, cat } = el.dataset;
+  const { action, id, kind, cat, year } = el.dataset;
   switch (action) {
     case "logout": return doLogout();
     case "open-menu": $("#admSide").classList.add("adm-open"); $(".adm-scrim").classList.add("adm-open"); return;
@@ -852,6 +890,12 @@ async function onClick(e) {
     case "cat-publish": case "cat-unpublish": {
       const ids = S.media.filter((m) => m.category === cat).map((m) => m.id), pub = action === "cat-publish";
       if (pub || await confirmDialog(`Hide all ${ids.length} items in "${cat}" from the public website?`, { title: "Unpublish category", yes: "Unpublish", danger: false })) await setStatus(ids, pub ? "published" : "unpublished");
+      return;
+    }
+    case "year-publish": case "year-unpublish": {
+      const y = Number(year), ids = S.media.filter((m) => yearOf(m) === y).map((m) => m.id), pub = action === "year-publish";
+      if (!ids.length) return toast(`No items in ${y}.`, "info");
+      if (pub || await confirmDialog(`Hide all ${ids.length} items from ${y} on the public website?`, { title: `Unpublish ${y}`, yes: "Unpublish", danger: false })) await setStatus(ids, pub ? "published" : "unpublished");
     }
   }
 }
@@ -867,7 +911,9 @@ function onChange(e) {
   else if (t.matches("[data-select]")) { t.checked ? S.sel.add(t.dataset.select) : S.sel.delete(t.dataset.select); t.closest(".mcard")?.classList.toggle("is-selected", t.checked); paintBulk(); }
   else if (t.matches("[data-sort]")) { S.f.sort = t.value; paintLibrary(); }
   else if (t.matches("[data-catfilter]")) { S.f.cat = t.value; paintLibrary(); }
+  else if (t.matches("[data-yearfilter]")) { S.f.year = t.value; S.limit = PAGE; paintLibrary(); }
   else if (t.matches("[data-opt=publish]")) S.uploadOpts.publish = t.checked;
+  else if (t.matches("[data-opt=year]")) S.uploadOpts.year = clampYear(t.value);
 }
 let searchTimer;
 function onInput(e) {

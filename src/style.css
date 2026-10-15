@@ -409,37 +409,122 @@ body.lang-mr .eyebrow {
   gap: 1rem;
 }
 
+/* =====================================================================
+   LOGO — fixed size on every device, never stretched
+   Change ONLY --logo-size to make the logo bigger or smaller.
+   ===================================================================== */
 .brand {
-  display: flex;
-  align-items: center;
-  gap: .7rem;
+  --logo-size: 46px;
+  /* normal phones */
+  gap: .6rem;
   min-width: 0;
 }
 
 .brand__mark {
-  width: 65px;
-  height: 65px;
-  flex-shrink: 0;
+  width: var(--logo-size);
+  height: var(--logo-size);
+  flex: 0 0 var(--logo-size);
+  margin: 0;
   border-radius: 50%;
-  background: radial-gradient(circle at 30% 30%, rgba(246, 217, 139, .25), rgba(59, 23, 104, .6));
-  box-shadow: 0 0 24px rgba(232, 182, 76, .35);
-  display: grid;
-  place-items: center;
-  margin-top: 1px;
+  overflow: hidden;
+  /* keeps it perfectly round */
+  display: block;
 
-}
+  /* matches the white of the jpeg */
 
-.brand__mark svg {
-  animation: spinSlow 30s linear infinite;
+  transition: width .4s var(--ease), height .4s var(--ease), flex-basis .4s var(--ease);
 }
 
 .brand__logo {
-  width: 150px;
-  height: 65px;
-  border-radius: 50%;
-  padding-bottom: 25px;
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border-radius: 0;
+  object-fit: cover;
+  /* fills the circle, no stretching */
+  object-position: center 48%;
+  transform: scale(.92);
+  /* small margin so the flame isn't clipped */
+  animation: none;
+}
 
+/* ---------- Very small phones ---------- */
+@media (max-width: 380px) {
+  .brand {
+    --logo-size: 40px;
+    gap: .45rem;
+  }
 
+  .nav.is-scrolled .brand {
+    --logo-size: 36px;
+  }
+
+  .brand__name {
+    font-size: .72rem;
+    max-width: 105px;
+  }
+
+  .brand__place {
+    font-size: .58rem;
+    letter-spacing: .28em;
+  }
+}
+
+/* ---------- Phones ---------- */
+@media (min-width: 381px) and (max-width: 767px) {
+  .brand {
+    --logo-size: 46px;
+  }
+
+  .nav.is-scrolled .brand {
+    --logo-size: 40px;
+  }
+}
+
+/* ---------- Tablets ---------- */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .brand {
+    --logo-size: 54px;
+  }
+
+  .nav.is-scrolled .brand {
+    --logo-size: 46px;
+  }
+}
+
+/* ---------- Laptops and large screens ---------- */
+@media (min-width: 1024px) {
+  .brand {
+    --logo-size: 60px;
+  }
+
+  .nav.is-scrolled .brand {
+    --logo-size: 50px;
+  }
+}
+
+/* ---------- Footer logo: fixed size ---------- */
+.brand--footer,
+.nav.is-scrolled .brand--footer {
+  --logo-size: 58px;
+}
+
+/* ===== Append to the END of style.css — public gallery year filter ===== */
+.media-years {
+  margin-top: -.6rem;
+  margin-bottom: 1.4rem;
+}
+
+.media-years .chip {
+  min-height: 36px;
+  padding: .35rem .95rem;
+  font-size: .82rem;
+  font-family: "Inter", var(--f-mr);
+}
+
+.media-years[hidden] {
+  display: none !important;
 }
 
 @keyframes spinSlow {
@@ -620,6 +705,7 @@ body.lang-mr .eyebrow {
   visibility: hidden;
   transition: clip-path .7s var(--ease), visibility 0s .7s;
 }
+
 
 .nav.menu-open .mobile-menu {
   clip-path: circle(150% at calc(100% - 44px) 38px);

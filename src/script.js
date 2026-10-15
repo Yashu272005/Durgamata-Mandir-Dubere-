@@ -9,7 +9,7 @@
    5.  LANGUAGE SYSTEM   → switch without reload + localStorage
    6.  RENDERERS         → dynamic cards
    7.  COUNTDOWNS
-   8.  GALLERY + LIGHTBOX
+   8.  GALLERY + LIGHTBOX (now with YEAR filter 2024–2035)
    9.  VIDEO MODAL
    10. NAV / SCROLL / REVEAL / COUNTERS / BACK-TO-TOP
    11. PARTICLES + PETALS
@@ -26,12 +26,7 @@ import { initAdmin } from "./admin.js";
    1. CONFIG — update these values when real information is available
    --------------------------------------------------------------------- */
 const CONFIG = {
-  // Navratri countdown target (YYYY-MM-DDTHH:mm:ss, local time).
-  // NOTE: Tentative — please update with the Mandal's official date.
   navratriStart: "2026-10-11T06:00:00",
-
-  // Durga Daud countdown target. Keep null until the official date is
-  // announced — the countdown will then follow the Navratri start date.
   durgaDaudStart: null,
   mapEmbedUrl: "",
   routeMapEmbedUrl: "",
@@ -156,9 +151,6 @@ const translations = {
     evTitle: "आगामी कार्यक्रम",
     evDesc: "नवरात्र उत्सवातील भक्ती, संगीत आणि संस्कृतीने नटलेले कार्यक्रम. सर्व भाविकांचे हार्दिक स्वागत!",
 
-
-
-
     // Gallery
     galTag: "क्षणचित्रे",
     galTitle: "उत्सवाचे क्षण",
@@ -170,6 +162,8 @@ const translations = {
     mediaPhotos: "फोटो",
     mediaVideos: "व्हिडिओ",
     mediaMore: "आणखी पहा",
+    mediaAllYears: "सर्व वर्षे",
+    mediaYearAria: "वर्षानुसार निवडा",
 
     // Quote
     quoteL1: "श्रद्धा जिथे असते,",
@@ -313,6 +307,8 @@ const translations = {
     mediaPhotos: "Photos",
     mediaVideos: "Videos",
     mediaMore: "Load more",
+    mediaAllYears: "All years",
+    mediaYearAria: "Filter by year",
 
     quoteL1: "Where there is faith,",
     quoteL2: "there is the blessing of Maa Durga.",
@@ -388,11 +384,6 @@ const NINE_FORMS = [
   },
 ];
 
-/**
- * EVENTS — update dates/times here when announced.
- * Leave date/time as null to show "will be announced soon".
- * Example: date: { mr: "१२ ऑक्टोबर २०२६", en: "12 October 2026" }
- */
 const EVENTS = [
   {
     icon: "🏺", img: px(37531064, 700), mr: "घटस्थापना", en: "Ghatasthapana",
@@ -476,7 +467,6 @@ function applyTranslations() {
   $$("[data-i18n-alt]").forEach((el) => (el.alt = t(el.dataset.i18nAlt)));
   $$("[data-i18n-aria]").forEach((el) => el.setAttribute("aria-label", t(el.dataset.i18nAria)));
 
-  // Toggle UI state
   $$(".lang-btn").forEach((b) => {
     const active = b.dataset.lang === lang;
     b.classList.toggle("is-active", active);
@@ -489,7 +479,6 @@ function applyTranslations() {
       ? "दुर्गा माता , डुबेर | Durga Mata Mitra Mandal Dubere"
       : "Durga Mata Mitra Mandal Dubere | दुर्गा माता मित्र मंडळ";
 
-  // Re-render dynamic content
   renderForms();
   renderEvents();
   renderHighlights();
@@ -570,14 +559,30 @@ function renderHighlights() {
 }
 
 /* ---------------------------------------------------------------------
-   8. GALLERY + LIGHTBOX
+   8. GALLERY + LIGHTBOX  (photo/video filter + YEAR filter 2024–2035)
    --------------------------------------------------------------------- */
+const YEAR_MIN = 2024;
+const YEAR_MAX = 2035;
+
 let mediaItems = [];
 let mediaStatusKey = "mediaLoading";
 let mediaFilter = "all";
+let mediaYear = "";          // "" = all years, otherwise "2024" … "2035"
+let mediaYears = [];         // years that actually have published media
 let mediaHasMore = false;
 let mediaBusy = false;
 const MEDIA_PAGE = 12;
+
+// Year filter row is created here, right under the photo/video chips (no HTML change needed).
+const yearsEl = (() => {
+  const el = document.createElement("div");
+  el.id = "mediaYears";
+  el.className = "media-filters media-years";
+  el.setAttribute("role", "tablist");
+  el.hidden = true;
+  $("#mediaFilters").after(el);
+  return el;
+})();
 
 function escapeHTML(value) {
   return String(value).replace(/[&<>"']/g, (character) => ({
@@ -592,14 +597,16 @@ function mediaPublicUrl(item, path = item.storage_path) {
 function mediaCardHTML(item, index) {
   const title = escapeHTML(item.title);
   const isVideo = item.media_type === "video";
-  // Cards only ever load a small thumbnail; the full photo/video loads on click.
   const thumbPath = item.thumbnail_path || (isVideo ? null : item.storage_path);
   const preview = thumbPath
     ? `<img src="${escapeHTML(mediaPublicUrl(item, thumbPath))}" alt="${title}" loading="lazy" decoding="async" />`
     : `<span class="media-card__ph"><svg width="40" height="40"><use href="#i-play"/></svg></span>`;
   const play = isVideo ? `<span class="media-card__play"><svg><use href="#i-play"/></svg></span>` : "";
   const kind = isVideo ? "VIDEO" : "PHOTO";
-  const cat = item.category && item.category !== "General" ? `<span class="media-card__cat">${escapeHTML(item.category)}</span>` : "";
+  const yr = item.year ? `${num(item.year)}` : "";
+  const catText = item.category && item.category !== "General" ? escapeHTML(item.category) : "";
+  const sub = [yr, catText].filter(Boolean).join(" · ");
+  const cat = sub ? `<span class="media-card__cat">${sub}</span>` : "";
   return `<article class="media-card" style="--i:${index % MEDIA_PAGE}"><button class="media-card__button" type="button" data-media-id="${escapeHTML(item.id)}" aria-label="${title}">${preview}${play}<span class="media-card__type">${kind}</span></button><p class="media-card__title">${title}${cat}</p></article>`;
 }
 
@@ -612,10 +619,19 @@ function renderMediaGrid() {
   status.hidden = mediaItems.length > 0 && !mediaStatusKey;
   more.hidden = !mediaHasMore;
   more.textContent = t("mediaMore");
-  filters.hidden = mediaItems.length === 0 && mediaFilter === "all";
+  const noFilters = mediaItems.length === 0 && mediaFilter === "all" && !mediaYear;
+  filters.hidden = noFilters;
   filters.innerHTML = [["all", "mediaAll"], ["image", "mediaPhotos"], ["video", "mediaVideos"]]
     .map(([key, label]) => `<button type="button" role="tab" class="chip ${mediaFilter === key ? "is-active" : ""}" data-media-filter="${key}" aria-selected="${mediaFilter === key}">${t(label)}</button>`)
     .join("");
+
+  // Year chips: "All years" + only years that really have published media
+  yearsEl.hidden = noFilters || mediaYears.length === 0;
+  yearsEl.setAttribute("aria-label", t("mediaYearAria"));
+  yearsEl.innerHTML = [`<button type="button" role="tab" class="chip ${mediaYear === "" ? "is-active" : ""}" data-media-year="" aria-selected="${mediaYear === ""}">${t("mediaAllYears")}</button>`]
+    .concat(mediaYears.map((y) => `<button type="button" role="tab" class="chip ${mediaYear === String(y) ? "is-active" : ""}" data-media-year="${y}" aria-selected="${mediaYear === String(y)}">${num(y)}</button>`))
+    .join("");
+
   grid.innerHTML = mediaItems.map(mediaCardHTML).join("");
 }
 
@@ -623,6 +639,12 @@ $("#mediaFilters").addEventListener("click", (event) => {
   const chip = event.target.closest("[data-media-filter]");
   if (!chip || chip.dataset.mediaFilter === mediaFilter) return;
   mediaFilter = chip.dataset.mediaFilter;
+  void loadPublicMedia(true);
+});
+yearsEl.addEventListener("click", (event) => {
+  const chip = event.target.closest("[data-media-year]");
+  if (!chip || chip.dataset.mediaYear === mediaYear) return;
+  mediaYear = chip.dataset.mediaYear;
   void loadPublicMedia(true);
 });
 $("#mediaMore").addEventListener("click", () => void loadPublicMedia(false));
@@ -638,19 +660,34 @@ $("#mediaGrid").addEventListener("click", (event) => {
   }
 });
 
-// Only PUBLISHED items are requested here, and the database also enforces it
-// (an admin who is signed in on the same browser still sees only published items on the public page).
+/** Which years (2024–2035) have published media? Used to build the year chips. */
+async function loadMediaYears() {
+  const { data, error } = await supabase
+    .from("gallery_media")
+    .select("year")
+    .eq("status", "published")
+    .gte("year", YEAR_MIN)
+    .lte("year", YEAR_MAX)
+    .limit(5000);
+  if (error) return; // chips simply stay hidden if the year column is not there yet
+  mediaYears = [...new Set((data || []).map((r) => r.year))].sort((a, b) => b - a);
+  renderMediaGrid();
+}
+
+// Only PUBLISHED items are requested here, and the database also enforces it.
 async function loadPublicMedia(reset = true) {
   if (mediaBusy) return;
   mediaBusy = true;
   if (reset) { mediaItems = []; mediaHasMore = false; mediaStatusKey = "mediaLoading"; renderMediaGrid(); }
   let query = supabase
     .from("gallery_media")
-    .select("id, title, media_type, storage_path, thumbnail_path, category, created_at")
+    .select("id, title, media_type, storage_path, thumbnail_path, category, year, created_at")
     .eq("status", "published")
+    .order("year", { ascending: false })
     .order("created_at", { ascending: false })
     .range(mediaItems.length, mediaItems.length + MEDIA_PAGE); // one extra row tells us if more exist
   if (mediaFilter !== "all") query = query.eq("media_type", mediaFilter);
+  if (mediaYear) query = query.eq("year", Number(mediaYear));
   const { data, error } = await query;
   mediaBusy = false;
   if (error) {
@@ -663,63 +700,6 @@ async function loadPublicMedia(reset = true) {
   mediaItems = mediaItems.concat(rows.slice(0, MEDIA_PAGE));
   mediaStatusKey = mediaItems.length ? "" : "mediaEmpty";
   renderMediaGrid();
-}
-
-function renderFilters() {
-  $$("[data-filters]").forEach((wrap) => {
-    const g = galleries[wrap.dataset.filters];
-    wrap.innerHTML = g.filters
-      .map(
-        (f) =>
-          `<button type="button" role="tab" class="chip ${g.active === f.key ? "is-active" : ""}" data-key="${f.key}" aria-selected="${g.active === f.key}">${t(f.label)}</button>`
-      )
-      .join("");
-    $$(".chip", wrap).forEach((chip) =>
-      chip.addEventListener("click", () => {
-        if (g.active === chip.dataset.key) return;
-        g.active = chip.dataset.key;
-        $$(".chip", wrap).forEach((c) => {
-          c.classList.toggle("is-active", c === chip);
-          c.setAttribute("aria-selected", c === chip);
-        });
-        renderGallery(wrap.dataset.filters, true);
-      })
-    );
-  });
-}
-
-function visibleItems(id) {
-  const g = galleries[id];
-  return g.items.filter((it) => g.active === "all" || it.cat === g.active);
-}
-
-function renderGallery(id, animate) {
-  const el = document.getElementById(id);
-  const doRender = () => {
-    const items = visibleItems(id);
-    const g = galleries[id];
-    el.innerHTML = items
-      .map((it, i) => {
-        const catLabel = t(g.filters.find((f) => f.key === it.cat)?.label || "fAll");
-        return `
-        <figure class="tile ${it.tall ? "tile--tall" : ""}" style="--i:${i}" tabindex="0" role="button" aria-label="${it[lang]}" data-index="${i}">
-          <img src="${it.src}" alt="${it[lang]}" loading="lazy" />
-          <figcaption><span class="tile__cat">${catLabel}</span><span class="tile__title">${it[lang]}</span></figcaption>
-          <span class="tile__zoom"><svg><use href="#i-expand"/></svg></span>
-        </figure>`;
-      })
-      .join("");
-    $$(".tile", el).forEach((tile) => {
-      const open = () => openLightbox(id, +tile.dataset.index);
-      tile.addEventListener("click", open);
-      tile.addEventListener("keydown", (e) => (e.key === "Enter" || e.key === " ") && (e.preventDefault(), open()));
-    });
-    requestAnimationFrame(() => el.classList.remove("is-filtering"));
-  };
-  if (animate && !prefersReduced) {
-    el.classList.add("is-filtering");
-    setTimeout(doRender, 250);
-  } else doRender();
 }
 
 const lb = { el: $("#lightbox"), img: $("#lbImg"), cap: $("#lbCap"), count: $("#lbCount"), list: [], i: 0, lastFocus: null };
@@ -741,7 +721,7 @@ function showLightboxImage(dir = 0) {
   if (dir) lb.img.classList.add(dir > 0 ? "slide-l" : "slide-r");
   lb.img.src = mediaPublicUrl(item);
   lb.img.alt = item.title;
-  lb.cap.textContent = item.title;
+  lb.cap.textContent = item.year ? `${item.title} · ${num(item.year)}` : item.title;
   lb.count.textContent = `${num(lb.i + 1)} / ${num(lb.list.length)}`;
 }
 function stepLightbox(direction) {
@@ -799,7 +779,6 @@ function openVideo(src, title) {
   vm.el.classList.add("is-open");
   vm.el.setAttribute("aria-hidden", "false");
   document.body.classList.add("no-scroll");
-  // Started by the user's click — never autoplays on page load
   vm.player.play().catch(() => { });
   $("#vClose").focus();
 }
@@ -839,7 +818,6 @@ $("#contactBtn").addEventListener("click", () => {
   else toast(t("toastContact"));
 });
 
-// Maps: insert real iframe only when a URL is configured
 function mountMap(sel, url) {
   if (!url) return;
   $(sel).innerHTML = `<iframe src="${url}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen title="Google Maps"></iframe>`;
@@ -847,7 +825,6 @@ function mountMap(sel, url) {
 mountMap("#contactMap", CONFIG.mapEmbedUrl);
 mountMap("#routeMap", CONFIG.routeMapEmbedUrl);
 
-// Social icons: real links only when provided
 const SOCIAL_ICONS = { instagram: ["i-ig", "Instagram"], facebook: ["i-fb", "Facebook"], youtube: ["i-yt", "YouTube"], whatsapp: ["i-wa", "WhatsApp"] };
 $("#socials").innerHTML = Object.entries(SOCIAL_ICONS)
   .map(([k, [ico, name]]) => {
@@ -928,11 +905,13 @@ function toggleMenu(force) {
 burger.addEventListener("click", () => toggleMenu());
 
 // Smooth navigation for all in-page links
+// (FIX: removed the stray initAdmin() call that used to be here — it re-registered
+//  every admin event listener on each link click. initAdmin() already runs once in init().)
 document.addEventListener("click", (e) => {
   const a = e.target.closest('a[href^="#"]');
   if (!a) return;
   const id = a.getAttribute("href");
-  if (id.length < 2) return;
+  if (id.length < 2 || id.startsWith("#/")) return; // let admin hash-routes work normally
   const target = document.querySelector(id);
   if (!target) return;
   e.preventDefault();
@@ -940,10 +919,8 @@ document.addEventListener("click", (e) => {
   const y = target.getBoundingClientRect().top + window.scrollY - (id === "#home" ? 0 : nav.offsetHeight - 1);
   window.scrollTo({ top: y, behavior: prefersReduced ? "auto" : "smooth" });
   history.replaceState(null, "", id);
-  initAdmin();
 });
 
-// Scroll effects: navbar glass, back-to-top progress, parallax, active link
 const toTop = $("#toTop");
 const ring = $(".to-top__ring circle");
 const RING_LEN = 2 * Math.PI * 21;
@@ -983,7 +960,6 @@ window.addEventListener("scroll", () => {
 }, { passive: true });
 toTop.addEventListener("click", () => window.scrollTo({ top: 0, behavior: prefersReduced ? "auto" : "smooth" }));
 
-// Reveal on scroll
 const revealObs = new IntersectionObserver(
   (entries) => entries.forEach((en) => {
     if (en.isIntersecting) { en.target.classList.add("in"); revealObs.unobserve(en.target); }
@@ -994,7 +970,6 @@ function observeReveals() {
   $$(".reveal:not(.in)").forEach((el) => revealObs.observe(el));
 }
 
-// Animated counters
 const countObs = new IntersectionObserver((entries) => {
   entries.forEach((en) => {
     if (!en.isIntersecting) return;
@@ -1014,7 +989,6 @@ const countObs = new IntersectionObserver((entries) => {
 }, { threshold: 0.5 });
 $$(".stat__num").forEach((el) => countObs.observe(el));
 
-// Subtle 3D tilt for cards (pointer devices only)
 function attachTilt(cards) {
   if (prefersReduced || !matchMedia("(hover: hover)").matches) return;
   cards.forEach((c) => {
@@ -1087,7 +1061,6 @@ function initParticles(canvas) {
   window.addEventListener("resize", () => { resize(); if (prefersReduced) drawStatic(); });
   function drawStatic() { draw(); cancelAnimationFrame(raf); }
   if (prefersReduced) { drawStatic(); return; }
-  // Only animate when on screen (performance)
   new IntersectionObserver(([en]) => {
     if (en.isIntersecting && !visible) { visible = true; draw(); }
     else if (!en.isIntersecting && visible) { visible = false; cancelAnimationFrame(raf); }
@@ -1117,6 +1090,7 @@ function init() {
   buildCountdowns();
   applyTranslations();
   void loadPublicMedia();
+  void loadMediaYears();
   initAdmin();
   observeReveals();
   setInterval(tickCountdowns, 1000);
