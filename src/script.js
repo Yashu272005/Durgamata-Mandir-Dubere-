@@ -72,7 +72,7 @@ const translations = {
     heroBtn1: "उत्सव पहा",
     heroBtn2: "गॅलरी पहा",
     heroScroll: "खाली स्क्रोल करा",
-    heroAlt: "नवरात्र उत्सवासाठी सजवलेली दुर्गा मातेची मूर्ती",
+
 
     aboutTag: "आमची ओळख",
     aboutTitle: "आमच्याबद्दल",

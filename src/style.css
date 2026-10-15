@@ -417,19 +417,29 @@ body.lang-mr .eyebrow {
 }
 
 .brand__mark {
-  width: 46px;
-  height: 46px;
+  width: 65px;
+  height: 65px;
   flex-shrink: 0;
   border-radius: 50%;
   background: radial-gradient(circle at 30% 30%, rgba(246, 217, 139, .25), rgba(59, 23, 104, .6));
   box-shadow: 0 0 24px rgba(232, 182, 76, .35);
   display: grid;
   place-items: center;
-  margin-bottom: .5rem;
+  margin-top: 1px;
+
 }
 
 .brand__mark svg {
   animation: spinSlow 30s linear infinite;
+}
+
+.brand__logo {
+  width: 150px;
+  height: 65px;
+  border-radius: 50%;
+  padding-bottom: 25px;
+
+
 }
 
 @keyframes spinSlow {
