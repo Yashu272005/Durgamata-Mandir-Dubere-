@@ -32,8 +32,8 @@ const CONFIG = {
   routeMapEmbedUrl: "",
   directionsUrl: "https://www.google.com/maps/search/?api=1&query=Dubere%2C%20Maharashtra",
   phone: "",
-  email: "",
-  social: { instagram: "", facebook: "", youtube: "", whatsapp: "" },
+
+  social: { instagram: "https://www.instagram.com/durgamata_mandir_dubere?mdxt=MWduZmowOGF1bnJiOA==", whatsapp: "https://chat.whatsapp.com/JFtUK6F7Ncc13JHIE8tYAT?s=sw&p=a&mlu=4&ilr=4" },
 };
 
 
@@ -178,8 +178,6 @@ const translations = {
     ctAddr: "डुबेरे",
     ctPhoneLabel: "फोन",
     ctPhone: "9970855780",
-    ctEmailLabel: "ई-मेल",
-    ctEmail: "ई-मेल लवकरच उपलब्ध",
     mapSoon: "अचूक स्थान लवकरच जोडले जाईल",
     btnDirections: "दिशा मिळवा",
     btnContact: "संपर्क करा",
@@ -190,10 +188,10 @@ const translations = {
     ftAbout: "नवरात्र उत्सव, दुर्गा माता दौड आणि सांस्कृतिक उपक्रमांतून डुबेर गावात भक्ती आणि एकतेचा दीप तेवत ठेवणारे मंडळ.",
     ftLinks: "द्रुत दुवे",
     ftConnect: "जोडलेले राहा",
-    socialSoon: "सोशल मीडिया लिंक लवकरच उपलब्ध होतील.",
+
     ftCopyPre: "©",
     ftCopy: "दुर्गा माता मंदिर, डुबेरे. सर्व हक्क राखीव.",
-    ftMade: "भक्तीभावाने तयार केलेले 🙏",
+    ftMade: "भक्तीभावाने तयार केलेले 🙏 @webcreaters",
     backTop: "वर जा",
   },
 
@@ -321,8 +319,8 @@ const translations = {
     ctAddr: "Dubere",
     ctPhoneLabel: "Phone",
     ctPhone: "Contact number coming soon",
-    ctEmailLabel: "Email",
-    ctEmail: "Email coming soon",
+
+
     mapSoon: "The exact location will be added soon",
     btnDirections: "Get Directions",
     btnContact: "Contact Us",
@@ -332,10 +330,10 @@ const translations = {
     ftAbout: "A Mandal keeping the lamp of devotion and unity alive in Dubere through Navratri, Durga Daud and cultural activities.",
     ftLinks: "Quick links",
     ftConnect: "Stay connected",
-    socialSoon: "Social media links will be available soon.",
+
     ftCopyPre: "©",
     ftCopy: "Durga Mata Mandir, Dubere. All rights reserved.",
-    ftMade: "Made with devotion 🙏",
+    ftMade: "Made with devotion 🙏 @webcreaters",
     backTop: "Back to top",
   },
 };
@@ -401,14 +399,8 @@ const EVENTS = [
     icon: "🪔", img: px(35655143, 700), mr: "महाआरती", en: "Maha Aarti",
     dMr: "शेकडो दिव्यांच्या प्रकाशात मातेची महाआरती.", dEn: "The grand aarti of the Mother in the glow of countless diyas."
   },
-  {
-    icon: "🎶", img: px(33437388, 700), mr: "भजन संध्या", en: "Bhajan Sandhya",
-    dMr: "भक्तिगीते आणि भजनांनी सजलेली सायंकाळ.", dEn: "An evening filled with devotional songs and bhajans."
-  },
-  {
-    icon: "🍛", img: px(29215357, 700), mr: "महाप्रसाद", en: "Mahaprasad",
-    dMr: "सर्व भाविकांसाठी प्रेमाने तयार केलेला महाप्रसाद.", dEn: "Sacred food lovingly prepared for all devotees."
-  },
+
+
   {
     icon: "🎭", img: px(36592889, 700), mr: "सांस्कृतिक कार्यक्रम", en: "Cultural Programme",
     dMr: "नृत्य, नाट्य आणि कलागुणांचे सादरीकरण.", dEn: "Performances of dance, drama and local talent."
@@ -418,11 +410,11 @@ const EVENTS = [
     dMr: "असत्यावर सत्याच्या विजयाचा उत्सव — दसरा.", dEn: "Dussehra — celebrating the victory of good over evil."
   },
   {
-    icon: "", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQGUfyZNezCo-KAVSrwsqUtSsztAePrYM6EbhBgYDDhuw&s=10", mr: "कोजागरी पौर्णिमेची", en: "Kojagiri Purnima",
+    icon: "🌕", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQGUfyZNezCo-KAVSrwsqUtSsztAePrYM6EbhBgYDDhuw&s=10", mr: "कोजागरी पौर्णिमेची", en: "Kojagiri Purnima",
     dMr: "कोजागरी पौर्णिमा (आश्विन किंवा शरद पौर्णिमा) हा हिंदू धर्मातील एक महत्त्वाचा सण आहे.", dEn: "Kojagiri Purnima (also known as Ashwin Purnima or Sharad Purnima) is a highly significant and auspicious festival in Hinduism."
   },
   {
-    icon: "", img: "https://d3pc1xvrcw35tl.cloudfront.net/ln/images/420x315/vasubaras_2025101020828.jpg", mr: "वसुबारस", en: "Vasubaras",
+    icon: "🐄", img: "https://d3pc1xvrcw35tl.cloudfront.net/ln/images/420x315/vasubaras_2025101020828.jpg", mr: "वसुबारस", en: "Vasubaras",
     dMr: "वसुबारस (गोवत्स द्वादशी) हा महाराष्ट्रात दिवाळीची सुरुवात करणारा पहिला सण आहे", dEn: "Vasubaras (also known as Govatsa Dwadashi) is the first festival that marks the beginning of the Diwali celebrations in Maharashtra."
   }
 ];
@@ -537,11 +529,7 @@ function renderEvents() {
         <h3 class="event__title">${e[lang]}</h3>
         <p class="event__alt">${e[other()]}</p>
         <p class="event__desc">${pick(e, "d")}</p>
-        <ul class="event__meta">
-          <li><svg><use href="#i-cal"/></svg><span><b>${t("evDate")}:</b> ${e.date ? e.date[lang] : t("dateTBA")}</span></li>
-          <li><svg><use href="#i-clock"/></svg><span><b>${t("evTime")}:</b> ${e.time ? e.time[lang] : t("timeTBA")}</span></li>
-          <li><svg><use href="#i-pin"/></svg><span><b>${t("evLoc")}:</b> ${e.location ? e.location[lang] : t("locDubere")}</span></li>
-        </ul>
+     
       </div>
     </article>`
   ).join("");
@@ -798,7 +786,7 @@ vm.el.addEventListener("click", (e) => e.target === vm.el && closeVideo());
    --------------------------------------------------------------------- */
 function renderContact() {
   if (CONFIG.phone) $("#phoneText").textContent = CONFIG.phone;
-  if (CONFIG.email) $("#emailText").textContent = CONFIG.email;
+
 }
 
 const toastEl = $("#toast");
@@ -814,7 +802,7 @@ $$("[data-toast]").forEach((b) => b.addEventListener("click", () => toast(t(b.da
 $("#directionsBtn").href = CONFIG.directionsUrl;
 $("#contactBtn").addEventListener("click", () => {
   if (CONFIG.phone) window.location.href = `tel:${CONFIG.phone}`;
-  else if (CONFIG.email) window.location.href = `mailto:${CONFIG.email}`;
+
   else toast(t("toastContact"));
 });
 
@@ -825,7 +813,7 @@ function mountMap(sel, url) {
 mountMap("#contactMap", CONFIG.mapEmbedUrl);
 mountMap("#routeMap", CONFIG.routeMapEmbedUrl);
 
-const SOCIAL_ICONS = { instagram: ["i-ig", "Instagram"], facebook: ["i-fb", "Facebook"], youtube: ["i-yt", "YouTube"], whatsapp: ["i-wa", "WhatsApp"] };
+const SOCIAL_ICONS = { instagram: ["i-ig", "Instagram"], whatsapp: ["i-wa", "WhatsApp"] };
 $("#socials").innerHTML = Object.entries(SOCIAL_ICONS)
   .map(([k, [ico, name]]) => {
     const url = CONFIG.social[k];

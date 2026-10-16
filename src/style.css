@@ -393,7 +393,7 @@ body.lang-mr .eyebrow {
 }
 
 .nav.is-scrolled {
-  --nav-h: 66px;
+  --nav-h: 88px;
   background: rgba(10, 15, 44, .62);
   backdrop-filter: blur(18px) saturate(160%);
   -webkit-backdrop-filter: blur(18px) saturate(160%);
